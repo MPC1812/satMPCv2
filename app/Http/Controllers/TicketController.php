@@ -46,14 +46,20 @@ class TicketController extends Controller
 
     public function consultar(Request $request)
     {
+        // Buscamos el ticket por el código introducido
         $ticket = Ticket::where('codigo', $request->codigo)->first();
 
         if (!$ticket) {
-            return back()->with('error', 'Ticket no encontrado');
+            // CAMBIO CLAVE: Usamos withErrors para que se guarde en la bolsa de errores de 'codigo'
+            // y withInput para que el código mal escrito no se borre del cuadro
+            return back()
+                ->withInput()
+                ->withErrors(['codigo' => 'El número de parte no existe o es incorrecto.']);
         }
 
         return view('tickets.estado', compact('ticket'));
     }
+
 
     public function show(Ticket $ticket)
     {

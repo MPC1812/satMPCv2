@@ -34,13 +34,19 @@
                         <span class="flex-shrink-0 w-6 h-6 bg-blue-500/20 rounded flex items-center justify-center text-blue-400 text-xs">
                             <i class="fas fa-check"></i>
                         </span>
-                        Seguimiento de tickets en tiempo real (RF5)
+                        Seguimiento de tickets en tiempo real
                     </li>
                     <li class="flex items-center gap-4 text-sm font-medium opacity-80">
                         <span class="flex-shrink-0 w-6 h-6 bg-blue-500/20 rounded flex items-center justify-center text-blue-400 text-xs">
                             <i class="fas fa-check"></i>
                         </span>
-                        Técnicos especializados por marca (RF3)
+                        Técnicos especializados por marca
+                    </li>
+                    <li class="flex items-center gap-4 text-sm font-medium opacity-80">
+                        <span class="flex-shrink-0 w-6 h-6 bg-blue-500/20 rounded flex items-center justify-center text-blue-400 text-xs">
+                            <i class="fas fa-check"></i>
+                        </span>
+                        Repuestos originales y garantía de calidad
                     </li>
                 </ul>
             </div>
@@ -49,25 +55,19 @@
 
         <!-- PANEL DERECHO: Login -->
         <div class="w-full md:w-1/2 bg-white p-12 lg:p-16 flex flex-col justify-center">
+           @if ($errors->has('email') || $errors->has('password'))
+                <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl">
+                    <ul class="text-red-600 text-xs font-bold">
+                        @if($errors->has('email')) <li>{{ $errors->first('email') }}</li> @endif
+                        @if($errors->has('password')) <li>{{ $errors->first('password') }}</li> @endif
+                    </ul>
+                </div>
+            @endif
             
             <div class="mb-8">
                 <h2 class="text-2xl font-bold text-slate-800">Acceso al Sistema</h2>
                 <p class="text-slate-400 text-sm mt-1 font-medium italic">Introduce tus credenciales autorizadas.</p>
             </div>
-
-            <!-- BLOQUE DE ERRORES DE LOGIN -->
-            @if ($errors->any())
-                <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl animate-in fade-in slide-in-from-top-2 duration-300">
-                    <ul class="space-y-1">
-                        @foreach ($errors->all() as $error)
-                            <li class="text-red-600 text-xs font-bold flex items-center">
-                                <i class="fas fa-exclamation-circle mr-2 text-[10px]"></i> {{ $error }}
-                            </li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
             <form action="{{ route('login') }}" method="POST" class="space-y-6">
                 @csrf
                 
@@ -99,21 +99,34 @@
                     Entrar al Sistema (RF12)
                 </button>
             </form>
-
             <!-- SECCIÓN CONSULTA TICKET (Acceso Clientes) -->
             <div class="mt-10 pt-8 border-t border-slate-50 text-center">
                 <p class="text-[10px] text-slate-300 font-bold uppercase tracking-widest mb-4">¿Solo quieres consultar un estado?</p>
-                <form action="{{ route('tickets.consulta') }}" method="GET" class="relative max-w-xs mx-auto">
-                    <input type="text" name="codigo" 
-                        class="w-full pl-6 pr-12 py-3 border-2 border-blue-600 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest outline-none hover:bg-blue-50 focus:bg-blue-50 transition-colors placeholder:text-blue-300" 
-                        placeholder="Nº DE PARTE">
-                    <button type="submit" class="absolute right-1 top-1/2 -translate-y-1/2 bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center">
-                        <i class="fas fa-search text-[10px]"></i>
-                    </button>
-                </form>
+                
+                <div class="relative max-w-xs mx-auto">
+                    <!-- AVISO DE ERROR ESPECÍFICO (Ahora justo encima del buscador) -->
+                    @if ($errors->has('codigo'))
+                        <div class="mb-3 animate-bounce">
+                            <span class="bg-red-100 text-red-600 text-[9px] font-black uppercase px-3 py-1 rounded-full border border-red-200 italic">
+                                <i class="fas fa-times-circle mr-1"></i> {{ $errors->first('codigo') }}
+                            </span>
+                        </div>
+                    @endif
+
+                    <form action="{{ route('tickets.consulta') }}" method="GET" class="relative">
+                        <input type="text" name="codigo" value="{{ old('codigo') }}"
+                            class="w-full pl-6 pr-12 py-3 border-2 {{ $errors->has('codigo') ? 'border-red-500 bg-red-50' : 'border-blue-600' }} text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest outline-none hover:bg-blue-50 focus:bg-blue-50 transition-all placeholder:text-blue-300" 
+                            placeholder="Nº DE PARTE (EJ: SAT-001)">
+                        
+                        <button type="submit" class="absolute right-1 top-1/2 -translate-y-1/2 bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors shadow-lg">
+                            <svg xmlns="http://w3.org" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-
 </body>
 </html>
