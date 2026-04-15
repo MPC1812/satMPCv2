@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Resguardo SAT - {{ $ticket->codigo }}</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- <script src="https://tailwindcss.com"></script> -->
+    <style>
+        @media print {
+            .no-print { display: none; }
+            body { background: white; margin: 0; padding: 0; }
+            @page { margin: 0.5cm; }
+        }
+        .document-box { border: 1.5px solid #000; padding: 15px; margin-bottom: 10px; font-family: Arial, sans-serif; }
+        .section-title { font-size: 9px; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #eee; margin-bottom: 5px; padding-bottom: 2px; }
+        .data-text { font-size: 12px; font-weight: bold; }
+        .cut-line { border-top: 1px dashed #000; margin: 15px 0; position: relative; text-align: center; }
+        .cut-line:after { content: '✂ CORTE POR AQUÍ'; font-size: 8px; position: absolute; top: -6px; background: #fff; padding: 0 10px; left: 40%; }
+        .rgpd { font-size: 7px; line-height: 1.1; text-align: justify; margin-top: 8px; color: #333; }
+    </style>
+</head>
+<body class="bg-gray-100" onload="window.print()">
+
+    <div class="max-w-4xl mx-auto no-print p-4">
+        <button onclick="window.print()" class="bg-black text-white px-6 py-2 rounded font-bold text-xs uppercase">Imprimir Ahora</button>
+        <a href="{{ route('tickets.index') }}" class="ml-4 text-xs font-bold text-gray-500 uppercase italic">← Volver</a>
+    </div>
+
+    <div class="max-w-[21cm] mx-auto bg-white p-4">
+        
+        @foreach(['COPIA PARA EL CLIENTE', 'COPIA PARA EL TALLER'] as $index => $tipo)
+        <div class="document-box">
+            <!-- Encabezado: Logo y Tipo de Documento -->
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center gap-4">
+                    <!-- Espacio para el Logo -->
+                    <div class="w-20 h-20 bg-white flex items-center justify-center overflow-hidden">
+                        <img src="{{ asset('img/logo.png') }}" 
+                        alt="Logo satMPC" 
+                        class="w-full h-full object-contain">
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-black uppercase tracking-tighter leading-none">satMPC</h1>
+                        <p class="text-[10px] font-bold border-t border-black mt-1">{{ $tipo }}</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-[10px] font-bold uppercase italic">Ticket de Entrada</p>
+                    <p class="text-3xl font-black tracking-tighter">{{ $ticket->codigo }}</p>
+                    <p class="text-[10px] font-bold">{{ $ticket->created_at->format('d/m/Y - H:i') }}</p>
+                </div>
+            </div>
+
+            <!-- Datos Cliente y Equipo en paralelo -->
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="border border-gray-200 p-2 rounded">
+                    <p class="section-title">Datos del Cliente</p>
+                    <p class="data-text">{{ $ticket->cliente->nombre }} {{ $ticket->cliente->apellidos }}</p>
+                    <p class="text-[11px] leading-tight">DNI: {{ $ticket->cliente->dni }}</p>
+                    <p class="text-[11px] leading-tight">Tel: {{ $ticket->cliente->telefono }}</p>
+                </div>
+                <div class="border border-gray-200 p-2 rounded">
+                    <p class="section-title">Datos del Equipo</p>
+                    <p class="data-text uppercase">{{ $ticket->equipo }}</p>
+                </div>
+            </div>
+
+            <!-- Avería -->
+            <div class="border border-gray-200 p-2 rounded mb-4">
+                <p class="section-title">Descripción de la Avería / Observaciones</p>
+                <p class="text-[11px] italic min-h-[40px]">{{ $ticket->averia }}</p>
+            </div>
+
+            <!-- Firma y RGPD -->
+            <div class="grid grid-cols-12 gap-4 items-end">
+                <div class="col-span-8">
+                    @if($index === 0)
+                    <p class="rgpd italic">
+                        <strong>RGPD:</strong> De conformidad con el Reglamento General de Protección de Datos, le informamos que sus datos personales serán tratados por **satMPC** para la gestión del servicio técnico. Puede ejercer sus derechos de acceso, rectificación y supresión enviando una solicitud. Al firmar este documento, acepta nuestras condiciones de servicio y presupuesto mínimo de revisión.
+                    </p>
+                    @else
+                    <p class="text-[9px] font-bold text-gray-400">NOTAS INTERNAS: ____________________________________________________________________</p>
+                    @endif
+                </div>
+                <div class="col-span-4">
+                    <div class="border-t border-black text-center pt-1">
+                        <p class="text-[9px] font-bold uppercase">Firma del Cliente</p>
+                        <div class="h-12"></div> <!-- Espacio para firmar -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if($index === 0)
+            <div class="cut-line"></div>
+        @endif
+        @endforeach
+
+    </div>
+</body>
+</html>
+

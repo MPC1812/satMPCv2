@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso al Sistema - satMPC</title>
+    @vite(['resources/css/app.css','resources/js/app.js'])
+    <!-- <script src="https://tailwindcss.com"></script> -->
+</head>
+
+<body class="bg-slate-100 font-sans min-h-screen flex items-center justify-center p-4">
+
+    <!-- Contenedor Principal (Doble Panel) -->
+    <div class="w-full max-w-5xl flex flex-col md:flex-row bg-white rounded-[3rem] overflow-hidden shadow-2xl min-h-[600px] border border-slate-200">
+
+        <!-- PANEL IZQUIERDO: Acceso Personal -->
+        <div class="w-full md:w-1/2 bg-blue-700 p-12 flex flex-col justify-center text-white">
+
+            <div class="mb-8">
+                <h3 class="text-xs font-black uppercase tracking-[0.2em] opacity-70 italic mb-2">Área Administrativa</h3>
+                <h2 class="text-4xl font-black italic uppercase leading-tight">
+                    Acceso<br>Personal (RF12)
+                </h2>
+            </div>
+
+            <form action="{{ route('login') }}" method="POST" class="space-y-6">
+                @csrf
+
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black uppercase tracking-widest opacity-60 ml-1 italic">Email</label>
+                    <input 
+                        type="email" 
+                        name="email" 
+                        class="w-full px-6 py-4 bg-blue-800/50 border border-blue-400/30 rounded-2xl text-white outline-none font-bold" 
+                        placeholder="admin@satmpc.com" 
+                        required
+                    >
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black uppercase tracking-widest opacity-60 ml-1 italic">Contraseña</label>
+                    <input 
+                        type="password" 
+                        name="password" 
+                        class="w-full px-6 py-4 bg-blue-800/50 border border-blue-400/30 rounded-2xl text-white outline-none font-bold" 
+                        placeholder="••••••••" 
+                        required
+                    >
+                </div>
+
+                <button 
+                    type="submit" 
+                    class="w-full bg-white text-blue-700 font-black py-5 rounded-3xl shadow-xl uppercase text-sm tracking-widest transition-all transform hover:-translate-y-1 active:scale-95 italic"
+                >
+                    Entrar al Sistema
+                </button>
+            </form>
+        </div>
+
+        <!-- PANEL DERECHO: Consulta Cliente -->
+        <div class="w-full md:w-1/2 bg-white p-12 flex flex-col justify-center border-l border-slate-100">
+
+            <div class="mb-8">
+                <h3 class="text-xs font-black uppercase tracking-[0.2em] text-blue-600 italic mb-2">Área de Clientes</h3>
+                <h2 class="text-4xl font-black italic uppercase text-slate-800 leading-tight">
+                    Estado de<br>tu Reparación
+                </h2>
+            </div>
+
+            <form action="{{ route('tickets.consulta') }}" method="GET" class="space-y-6">
+
+                <p class="text-slate-500 font-medium leading-relaxed">
+                    Introduce el código de ticket entregado en tienda para consultar el avance de tu equipo.
+                </p>
+
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1 italic">Número de Ticket</label>
+                    <input 
+                        type="text" 
+                        name="codigo" 
+                        class="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none transition font-bold" 
+                        placeholder="Ej: SAT-0001" 
+                        required
+                    >
+                </div>
+
+                <button 
+                    type="submit" 
+                    class="w-full bg-slate-900 text-white font-black py-5 rounded-3xl shadow-xl shadow-slate-200 uppercase text-sm tracking-widest transition-all transform hover:-translate-y-1 active:scale-95 italic"
+                >
+                    Consultar Ahora
+                </button>
+
+                <div class="pt-6 text-center">
+                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest">
+                        Atención al cliente: 900 000 000
+                    </p>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+
+</body>
+</html>

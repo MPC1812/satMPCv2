@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de Gestión - satMPC</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- FontAwesome para los iconos de impresora y editar -->
+    <link rel="stylesheet" href="https://cloudflare.com">
+</head>
+<body class="bg-slate-50 p-8">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-3xl font-black text-slate-800 italic uppercase">Gestión de Equipos</h2>
+            <a href="{{ route('tickets.create') }}" class="bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold shadow-lg hover:bg-blue-700 transition uppercase text-xs italic tracking-widest">
+                + Nueva Entrada
+            </a>
+        </div>
+
+        <div class="bg-white rounded-[2rem] shadow-xl overflow-hidden border border-slate-200">
+            <table class="w-full text-left">
+                <thead class="bg-slate-50 border-b border-slate-100">
+                    <tr>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase text-slate-400 italic">Parte</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase text-slate-400 italic">Cliente</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase text-slate-400 italic">Equipo</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase text-slate-400 italic">Estado</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase text-slate-400 italic text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @foreach($tickets as $t)
+                    <tr class="hover:bg-blue-50/50 transition">
+                        <td class="px-6 py-4 font-black text-blue-600">{{ $t->codigo }}</td>
+                        <td class="px-6 py-4 font-bold text-slate-700">{{ $t->cliente->nombre }} {{ $t->cliente->apellidos }}</td>
+                        <td class="px-6 py-4 text-slate-500 font-medium">{{ $t->equipo }}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase italic 
+                                {{ $t->estado == 'Finalizado' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700' }}">
+                                {{ $t->estado }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <div class="flex justify-center items-center gap-4">
+                                <!-- Botón Editar -->
+                                <a href="{{ route('tickets.edit', $t->id) }}" 
+                                   class="text-blue-600 font-bold text-xs uppercase italic hover:underline flex items-center gap-1">
+                                   <i class="fas fa-edit text-[10px]"></i> Editar
+                                </a>
+                                
+                                <!-- Botón Reimprimir (Se abre en pestaña nueva para no interrumpir el flujo) -->
+                                <a href="{{ route('tickets.imprimir', $t->id) }}" 
+                                   target="_blank"
+                                   class="text-slate-500 font-bold text-xs uppercase italic hover:text-slate-800 flex items-center gap-1">
+                                   <i class="fas fa-print text-[10px]"></i> Imprimir
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
+

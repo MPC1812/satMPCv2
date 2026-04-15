@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Nueva Entrada - satMPC</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- <script src="https://tailwindcss.com"></script> -->
+
+</head>
+<body class="bg-slate-100 font-sans min-h-screen flex items-center justify-center p-4">
+<!-- BUSCADOR COMPACTO -->
+<div class="space-y-4 mb-6">
+    <div class="space-y-1">
+        <label class="text-[10px] font-black uppercase text-slate-400 italic ml-1">Buscar Cliente (DNI o Nombre)</label>
+        <div class="flex gap-2">
+            <input list="lista-clientes" id="cliente_input" placeholder="Empieza a escribir..." 
+                class="flex-1 px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none font-bold text-sm">
+            
+            <button type="button" id="btn-nuevo-cliente" class="hidden px-4 bg-green-500 text-white rounded-2xl font-black text-[9px] uppercase italic tracking-tighter transition-all">
+                + Nuevo
+            </button>
+        </div>
+        <datalist id="lista-clientes">
+            @foreach($clientes as $cliente)
+                <option value="{{ $cliente->dni }} - {{ $cliente->nombre }} {{ $cliente->apellidos }}" data-id="{{ $cliente->id }}">
+            @endforeach
+        </datalist>
+        <input type="hidden" name="cliente_id" id="cliente_id">
+    </div>
+
+    <!-- REGISTRO RÁPIDO COMPACTO -->
+    <div id="form-rapido-cliente" class="hidden p-5 bg-blue-50/50 rounded-[2rem] border border-blue-100">
+        <div class="grid grid-cols-2 gap-3">
+            <div class="col-span-2 text-[9px] font-black text-blue-600 uppercase italic mb-1">Datos Nuevo Cliente:</div>
+            <input type="text" name="nuevo_dni" id="nuevo_dni" placeholder="DNI" class="px-4 py-3 rounded-xl border border-white font-bold text-xs outline-none">
+            <input type="text" name="nuevo_tel" id="nuevo_tel" placeholder="Teléfono" class="px-4 py-3 rounded-xl border border-white font-bold text-xs outline-none">
+            <input type="text" name="nuevo_nom" id="nuevo_nom" placeholder="Nombre" class="px-4 py-3 rounded-xl border border-white font-bold text-xs outline-none">
+            <input type="text" name="nuevo_ape" id="nuevo_ape" placeholder="Apellidos" class="px-4 py-3 rounded-xl border border-white font-bold text-xs outline-none">
+        </div>
+    </div>
+</div>
+
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Equipo -->
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1 italic">Equipo / Modelo</label>
+                    <input type="text" name="equipo" placeholder="Ej: MacBook Pro 2022" class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none font-bold" required>
+                </div>
+                <!-- Estado Inicial -->
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1 italic">Estado Inicial</label>
+                    <input type="text" value="Recibido" class="w-full px-5 py-4 bg-slate-200 border border-slate-200 rounded-2xl text-slate-500 font-bold" readonly>
+                </div>
+            </div>
+
+            <!-- Avería -->
+            <div class="space-y-2">
+                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1 italic">Descripción de la Avería</label>
+                <textarea name="averia" rows="3" placeholder="Detalla el problema detectado..." class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none font-bold" required></textarea>
+            </div>
+
+            <div class="flex gap-4 pt-4">
+                <a href="{{ route('tickets.index') }}" class="w-1/3 bg-slate-100 text-slate-500 font-black py-5 rounded-3xl text-center text-xs uppercase tracking-widest italic">Cancelar</a>
+                <button type="submit" class="w-2/3 bg-blue-600 hover:bg-blue-700 text-white font-black py-5 rounded-3xl shadow-xl uppercase text-sm tracking-widest transition-all italic">
+                    Generar Ticket y Código
+                </button>
+            </div>
+        </form>
+    </div>
+</body>
+<script>
+    const input = document.getElementById('cliente_input');
+    const btnNuevo = document.getElementById('btn-nuevo-cliente');
+    const formRapido = document.getElementById('form-rapido-cliente');
+    const hiddenId = document.getElementById('cliente_id');
+
+    input.addEventListener('input', function(e) {
+        const list = document.getElementById('lista-clientes');
+        const option = Array.from(list.options).find(opt => opt.value === input.value);
+        
+        if (option) {
+            hiddenId.value = option.getAttribute('data-id');
+            btnNuevo.classList.add('hidden');
+            formRapido.classList.add('hidden');
+        } else {
+            hiddenId.value = "";
+            // Si escribe más de 3 letras y no encuentra nada, sugiere crear nuevo
+            if(input.value.length > 2) {
+                btnNuevo.classList.remove('hidden');
+            } else {
+                btnNuevo.classList.add('hidden');
+            }
+        }
+    });
+
+    btnNuevo.addEventListener('click', () => {
+        formRapido.classList.toggle('hidden');
+        // Si el técnico escribió un DNI en el buscador, lo pasamos al formulario nuevo
+        document.getElementById('nuevo_dni').value = input.value;
+    });
+</script>
+</html>

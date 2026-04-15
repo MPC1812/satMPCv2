@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SAT MPC - Gestión de Servicio Técnico</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+<body class="antialiased bg-gray-100">
+    <div class="min-h-screen flex flex-col items-center justify-center">
+        
+        <!-- Encabezado -->
+        <div class="mb-12 text-center">
+            <x-application-logo class="w-20 h-20 fill-current text-blue-600 mx-auto" />
+            <h1 class="mt-4 text-4xl font-black text-gray-800 tracking-tight">SAT <span class="text-blue-600">PRO</span></h1>
+            <p class="text-gray-500 uppercase tracking-widest text-xs font-bold">Sistema de Asistencia Técnica</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl px-6">
+            
+            <!-- SECCIÓN IZQUIERDA: ACCESO PERSONAL -->
+            <div class="bg-white p-8 rounded-2xl shadow-xl border-t-4 border-blue-600 flex flex-col justify-between transition-transform hover:scale-105">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Acceso Personal</h2>
+                    <p class="text-gray-500 text-sm mb-6">Área exclusiva para Técnicos y Administradores de la plataforma.</p>
+                </div>
+                
+                @if (Route::has('login'))
+                    @auth
+                        <!-- Si ya está logueado, le mandamos a su panel según rol -->
+                        <a href="{{ Auth::user()->role_id == 1 ? route('admin.dashboard') : route('tickets.index') }}" 
+                           class="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition-colors">
+                            Ir a mi Panel de Control
+                        </a>
+                    @else
+                        <!-- Si no está logueado, al Login -->
+                        <a href="{{ route('login') }}" 
+                           class="block w-full text-center bg-gray-800 hover:bg-black text-white font-bold py-4 rounded-xl shadow-lg transition-colors">
+                            Iniciar Sesión
+                        </a>
+                    @endauth
+                @endif
+            </div>
+
+            <!-- SECCIÓN DERECHA: CONSULTA CLIENTES -->
+            <div class="bg-white p-8 rounded-2xl shadow-xl border-t-4 border-green-500 flex flex-col justify-between transition-transform hover:scale-105">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Consulta de Partes</h2>
+                    <p class="text-gray-500 text-sm mb-6">¿Quieres saber el estado de tu equipo? Introduce tu número de parte.</p>
+                </div>
+
+                <form action="{{ route('tickets.consulta') }}" method="GET" class="space-y-4">
+                    <div class="relative">
+                        <input type="text" name="codigo" placeholder="Ej: SAT-001" required
+                               class="w-full border-gray-200 rounded-xl py-4 pl-4 focus:ring-green-500 focus:border-green-500 placeholder-gray-400">
+                    </div>
+                    <button type="submit" 
+                            class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-xl shadow-lg transition-colors">
+                        Consultar Estado
+                    </button>
+                </form>
+            </div>
+
+        </div>
+
+        <!-- Pie de página -->
+        <footer class="mt-16 text-gray-400 text-xs font-medium uppercase tracking-widest">
+            &copy; {{ date('Y') }} SAT MPC - MPC Computación
+        </footer>
+    </div>
+</body>
+</html>

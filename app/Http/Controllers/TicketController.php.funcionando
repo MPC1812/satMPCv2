@@ -1,0 +1,144 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Ticket;
+use App\Models\Cliente;
+use App\Models\Repuesto;
+
+class TicketController extends Controller
+{
+    public function index()
+    {
+        // Cargamos los tickets con sus clientes (Eager Loading)
+        $tickets = Ticket::with('cliente')->latest()->get();
+        return view('tickets.index', compact('tickets'));
+    }
+
+    public function consultar(Request $request)
+    {
+        // Buscamos el ticket por el código que llega del formulario
+        $ticket = Ticket::where('codigo', $request->codigo)->first();
+
+        if (!$ticket) {
+            return back()->with('error', 'Ticket no encontrado');
+        }
+
+        return view('tickets.estado', compact('ticket'));
+    }
+
+    public function create()
+    {
+        $clientes = Cliente::all();
+        return view('tickets.create', compact('clientes'));
+    }
+
+    public function store(Request $request)
+    {
+        // Registro de cliente si es nuevo
+        if (!$request->cliente_id) {
+            $request->validate([
+                'nuevo_dni' => 'required|unique:clientes,dni',
+                'nuevo_nom' => 'required',
+                'nuevo_tel' => 'required',
+                'nuevo_email' => 'nullable|email',
+            ]);
+
+            $cliente = Cliente::create([
+                'dni' => $request->nuevo_dni,
+                'nombre' => $request->nuevo_nom,
+                'apellidos' => $request->nuevo_ape,
+                'telefono' => $request->nuevo_tel,
+                'email' => $request->nuevo_email,
+            ]);
+            $cliente_id = $cliente->id;
+        } else {
+            $cliente_id = $request->cliente_id;
+        }
+
+        // Generar Código Correlativo SAT-00X
+        $ultimo = Ticket::latest()->first();
+        $num = $ultimo ? ((int) str_replace('SAT-', '', $ultimo->codigo)) + 1 : 1;
+        $codigo = 'SAT-' . str_pad($num, 3, '0', STR_PAD_LEFT);
+
+        // Crear el Ticket
+        $ticket = Ticket::create([
+            'codigo' => $codigo,
+            'cliente_id' => $cliente_id,
+            'equipo' => $request->equipo,
+            'averia' => $request->averia,
+            'estado' => 'Recibido',
+        ]);
+
+        return redirect()->route('tickets.imprimir', $ticket->id);
+    }
+
+    public function imprimir(Ticket $ticket)
+    {
+        $ticket->load('cliente');
+        return view('tickets.imprimir', compact('ticket'));
+    }
+
+    /**
+     * Muestra el formulario de edición
+     */
+    public function edit(Ticket $ticket)
+    {
+        // Cargamos datos extra para los select del formulario
+        $clientes = Cliente::all();
+        $repuestos = Repuesto::all();
+
+        // He usado la vista 'tecnico.edit' que es la que tenías en tus primeras rutas
+        return view('tecnico.edit', compact('ticket', 'clientes', 'repuestos'));
+    }
+
+    /**
+     * Procesa la actualización del ticket
+     */
+    public function update(Request $request, Ticket $ticket)
+    {
+        $request->validate([
+            'equipo' => 'required',
+            'estado' => 'required',
+        ]);
+
+        // 1. Actualizar datos básicos del ticket
+        $ticket->update($request->all());
+
+        // 2. Si se seleccionó un repuesto, lo registramos
+        if ($request->filled('repuesto_id')) {
+            $repuesto = Repuesto::findOrFail($request->repuesto_id);
+            $cantidad = $request->cantidad_repuesto;
+
+            // Verificamos si hay stock suficiente
+            if ($repuesto->stock_actual >= $cantidad) {
+                // Guardamos en la tabla pivote (6ª tabla)
+                $ticket->repuestos()->attach($repuesto->id, ['cantidad' => $cantidad]);
+
+                // Restamos del stock actual
+                $repuesto->decrement('stock_actual', $cantidad);
+            } else {
+                return back()->with('error', 'No hay stock suficiente de: ' . $repuesto->descripcion);
+            }
+        }
+
+        return redirect()->route('tickets.index')->with('success', 'Parte y stock actualizados correctamente');
+    }
+    public function destroyRepuesto(Ticket $ticket, $repuestoId)
+    {
+        $repuesto = Repuesto::findOrFail($repuestoId);
+
+        // Obtenemos la cantidad que se había usado buscando en la tabla pivote
+        $cantidadUsada = $ticket->repuestos()->where('repuesto_id', $repuestoId)->first()->pivot->cantidad;
+
+        // 1. Devolvemos el stock a la tienda
+        $repuesto->increment('stock_actual', $cantidadUsada);
+
+        // 2. Quitamos la relación
+        $ticket->repuestos()->detach($repuestoId);
+
+        return back()->with('success', 'Repuesto eliminado y stock devuelto');
+    }
+}
