@@ -13,11 +13,11 @@
                             <input type="text" name="name" class="w-full border-gray-300 rounded-md shadow-sm" required>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Email Académico/Empresa</label>
+                            <label class="block text-sm font-medium text-gray-700">Email / Usuario</label>
                             <input type="email" name="email" class="w-full border-gray-300 rounded-md shadow-sm" required>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Contraseña Provisional</label>
+                            <label class="block text-sm font-medium text-gray-700">Contraseña</label>
                             <input type="password" name="password" class="w-full border-gray-300 rounded-md shadow-sm" required>
                         </div>
                         <div>

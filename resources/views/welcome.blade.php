@@ -72,7 +72,7 @@
                 @csrf
                 
                 <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1 italic">Correo Electrónico</label>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1 italic">Correo Electrónico / Usuario</label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-300">
                             <i class="far fa-envelope text-lg"></i>

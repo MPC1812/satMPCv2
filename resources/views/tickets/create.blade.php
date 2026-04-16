@@ -100,7 +100,7 @@
                     Cancelar
                 </a>
                 <button type="submit" class="w-2/3 bg-blue-600 hover:bg-blue-700 text-white font-black py-5 rounded-3xl shadow-xl shadow-blue-200 uppercase text-sm tracking-widest transition-all transform active:scale-95 italic">
-                    Generar Ticket y Código
+                    Generar Ticket
                 </button>
             </div>
         </form>
