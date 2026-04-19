@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Ticket;
 use App\Models\Cliente;
 use App\Models\Repuesto;
-use App\Mail\EstadoTicketMail; // Importante: Asegúrate de crear este Mailable
+use App\Mail\EstadoTicketMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 
@@ -214,7 +214,7 @@ class TicketController extends Controller
                     session()->flash('success', 'Parte actualizado y cliente notificado.');
                 } catch (\Exception $e) {
                     // Si Railway o Mailjet fallan, registramos el error en el Log
-                    \Log::error("Error SMTP en Ticket {$ticket->codigo}: " . $e->getMessage());
+                    Log::error("Error SMTP en Ticket {$ticket->codigo}: " . $e->getMessage());
 
                     // Avisamos al usuario pero permitimos que continúe
                     session()->flash('warning', 'Cambios guardados, pero no se pudo enviar el aviso al cliente.');
