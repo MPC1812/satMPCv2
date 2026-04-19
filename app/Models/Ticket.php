@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Ticket extends Model
 {
-    protected $fillable = ['cliente_id', 'equipo', 'averia', 'notas_tecnicas', 'estado'];
+    protected $fillable = ['codigo', 'cliente_id', 'equipo', 'averia', 'notas_tecnicas', 'estado'];
 
     // Un ticket pertenece a un cliente
     public function cliente()
