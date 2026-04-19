@@ -178,25 +178,17 @@ class TicketController extends Controller
     public function update(Request $request, Ticket $ticket)
     {
         $request->validate([
-            'equipo' => 'required',
-            'estado' => 'required',
+            'equipo' => 'required|string|max:255',
+            'estado' => 'required|in:Recibido,En Proceso,Esperando Repuesto,Listo,Entregado',
+            'averia' => 'nullable|string|max:2000',          // Opcional, pero con límite
+            'notas_tecnicas' => 'nullable|string|max:5000', // Opcional, pero con límite
         ]);
-
+        // 1. Guardamos el estado previo y actualizamos los datos básicos
         $estadoAnterior = $ticket->estado;
-        $ticket->update($request->all());
+        // Solo actualizamos los campos validados
+        $ticket->update($request->only(['equipo', 'estado', 'averia', 'notas_tecnicas']));
 
-        // --- ENVÍO AUTOMÁTICO SI PASA A FINALIZADO ---
-        if ($estadoAnterior !== 'Listo' && $ticket->estado === 'Listo') {
-            $ticket->load('cliente');
-            if ($ticket->cliente && $ticket->cliente->email) {
-                try {
-                    Mail::to($ticket->cliente->email)->send(new EstadoTicketMail($ticket));
-                } catch (\Exception $e) {
-                    // Error silencioso para no interrumpir el flujo
-                }
-            }
-        }
-
+        // 2. GESTIÓN DE REPUESTOS (Lo hacemos antes del correo para asegurar los datos)
         if ($request->filled('repuesto_id')) {
             $repuesto = Repuesto::findOrFail($request->repuesto_id);
             $cantidad = $request->cantidad_repuesto;
@@ -209,14 +201,38 @@ class TicketController extends Controller
             }
         }
 
-        return redirect()->route('tickets.index')->with('success', 'Parte actualizado y cliente notificado si procede.');
+        // 3. ENVÍO AUTOMÁTICO SI PASA A LISTO (Con Try-Catch para evitar el Error 500)
+        if ($estadoAnterior !== 'Listo' && $ticket->estado === 'Listo') {
+            $ticket->load('cliente');
+
+            if ($ticket->cliente && $ticket->cliente->email) {
+                try {
+                    // Intentamos el envío con Mailjet a través de Railway
+                    Mail::to($ticket->cliente->email)->send(new EstadoTicketMail($ticket));
+
+                    // Si llega aquí, el correo se envió bien
+                    session()->flash('success', 'Parte actualizado y cliente notificado.');
+                } catch (\Exception $e) {
+                    // Si Railway o Mailjet fallan, registramos el error en el Log
+                    \Log::error("Error SMTP en Ticket {$ticket->codigo}: " . $e->getMessage());
+
+                    // Avisamos al usuario pero permitimos que continúe
+                    session()->flash('warning', 'Cambios guardados, pero no se pudo enviar el aviso al cliente.');
+                }
+            }
+        } else {
+            session()->flash('success', 'Parte actualizado correctamente.');
+        }
+
+        return redirect()->route('tickets.index');
     }
 
-   public function destroyRepuesto(Ticket $ticket, $repuestoId, $cantidad)
+
+    public function destroyRepuesto(Ticket $ticket, $repuestoId, $cantidad)
     {
         // 1. Buscamos el repuesto en el almacén para devolverle el stock
         $repuestoAlmacen = \App\Models\Repuesto::find($repuestoId);
-        
+
         if ($repuestoAlmacen) {
             // Devolvemos exactamente la cantidad de la línea pulsada
             $repuestoAlmacen->increment('stock_actual', $cantidad);
