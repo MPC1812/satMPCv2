@@ -1,65 +1,111 @@
-<x-app-layout>
-    <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-8">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-800">
-                        Editar Parte: <span class="text-blue-600">{{ $ticket->codigo }}</span>
-                    </h2>
-                    <a href="{{ route('tickets.index') }}" class="text-sm text-gray-500 hover:text-gray-700 underline">
-                        Volver al listado
-                    </a>
-                </div>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Parte - {{ $ticket->codigo }}</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
+    <style>
+        @media print {
+            /* Ocultamos todo lo innecesario para el cliente en el papel */
+            .no-print, form button, .bg-blue-50\/50, .repuestos-container { 
+                display: none !important; 
+            }
+            body { background: white !important; padding: 0 !important; margin: 0 !important; }
+            .max-w-6xl { max-width: 100% !important; width: 100% !important; }
+            .bg-white { box-shadow: none !important; border: 1px solid #f1f5f9 !important; border-radius: 1rem !important; }
+            @page { margin: 1cm; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 p-4 md:p-8 font-sans antialiased">
+    <div class="max-w-6xl mx-auto">
 
-                <!-- FORMULARIO PRINCIPAL: ACTUALIZAR DATOS Y AÑADIR PIEZAS -->
-                <form action="{{ route('tickets.update', $ticket->id) }}" method="POST" class="space-y-6">
+        <!-- CABECERA: BOTONES DE ACCIÓN (ESTILO SATMPC) -->
+        <div class="no-print mb-8 flex justify-between items-center">
+            <div class="flex items-center">
+                <!-- Botón Imprimir (Negro Rectangular) -->
+                <button onclick="window.print()" class="bg-black text-white px-8 py-3 rounded-lg font-black text-[11px] uppercase tracking-[0.15em] hover:bg-slate-800 transition-all shadow-sm">
+                    IMPRIMIR AHORA
+                </button>
+                
+                <!-- Botón Volver -->
+                <a href="{{ route('tickets.index') }}" class="ml-10 text-[11px] font-black text-slate-400 uppercase italic hover:text-black transition-colors tracking-[0.15em] flex items-center">
+                    <span class="mr-2">←</span> VOLVER
+                </a>
+            </div>
+
+            <!-- BOTÓN LOGOUT (ESTILO VISTA PRINCIPAL) -->
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="group flex items-center justify-center w-[52px] h-[52px] md:w-auto md:px-5 bg-white border border-slate-200 rounded-2xl shadow-sm hover:bg-red-50 hover:border-red-100 transition-all cursor-pointer">
+                    <span class="hidden md:block text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-red-600 transition-colors italic mr-3">
+                        Cerrar Sesión
+                    </span>
+                    <svg xmlns="http://w3.org" class="w-4 h-4 text-slate-400 group-hover:text-red-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                </button>
+            </form>
+        </div>
+
+        <!-- TÍTULO DEL PARTE -->
+        <div class="mb-8">
+            <h2 class="text-3xl font-black text-slate-800 italic uppercase leading-none tracking-tighter">
+                Editar Parte: <span class="text-blue-600">{{ $ticket->codigo }}</span>
+            </h2>
+        </div>
+
+        <!-- BLOQUE PRINCIPAL BLANCO -->
+        <div class="bg-white rounded-[2rem] shadow-xl border border-slate-200 overflow-hidden mb-12">
+            <div class="p-8 md:p-10">
+                
+                <!-- 1. FORMULARIO DE EDICIÓN Y AÑADIR MATERIAL -->
+                <form action="{{ route('tickets.update', $ticket->id) }}" method="POST" class="space-y-8">
                     @csrf
                     @method('PUT')
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <!-- Campo Equipo -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Equipo</label>
+                            <label class="block text-[10px] font-black uppercase text-slate-400 italic tracking-widest mb-2">Equipo / Dispositivo</label>
                             <input type="text" name="equipo" value="{{ old('equipo', $ticket->equipo) }}" 
-                                   class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                   class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 focus:ring-4 focus:ring-blue-100 focus:border-blue-300 transition-all outline-none">
                         </div>
 
                         <!-- Selector de Estado -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Estado del Parte</label>
-                            <select name="estado" class="w-full border-gray-300 rounded-md shadow-sm">
+                            <label class="block text-[10px] font-black uppercase text-slate-400 italic tracking-widest mb-2">Estado del Parte</label>
+                            <select name="estado" class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black uppercase italic tracking-widest text-slate-700 focus:ring-4 focus:ring-blue-100 outline-none">
                                 <option value="Recibido" {{ $ticket->estado == 'Recibido' ? 'selected' : '' }}>Recibido</option>
                                 <option value="En Proceso" {{ $ticket->estado == 'En Proceso' ? 'selected' : '' }}>En Proceso</option>
                                 <option value="Esperando Repuesto" {{ $ticket->estado == 'Esperando Repuesto' ? 'selected' : '' }}>Esperando Repuesto</option>
                                 <option value="Listo" {{ $ticket->estado == 'Listo' ? 'selected' : '' }}>Listo</option>
                                 <option value="Entregado" {{ $ticket->estado == 'Entregado' ? 'selected' : '' }}>Entregado</option>
                             </select>
-
                         </div>
                     </div>
 
-                    <!-- Campo Avería -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Descripción de la Avería</label>
-                        <textarea name="averia" rows="4" 
-                                  class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ old('averia', $ticket->averia) }}</textarea>
+                    <!-- Descripciones -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-slate-400 italic tracking-widest mb-2">Descripción Avería</label>
+                            <textarea name="averia" rows="5" class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-600 focus:ring-4 focus:ring-blue-100 outline-none">{{ old('averia', $ticket->averia) }}</textarea>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-slate-400 italic tracking-widest mb-2">Notas Técnicas de Reparación</label>
+                            <textarea name="notas_tecnicas" rows="5" class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-600 focus:ring-4 focus:ring-blue-100 outline-none" placeholder="Escribe aquí los detalles del trabajo realizado...">{{ old('notas_tecnicas', $ticket->notas_tecnicas) }}</textarea>
+                        </div>
                     </div>
 
-                    <!-- Campo Notas Técnicas -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Observaciones del Técnico</label>
-                        <textarea name="notas_tecnicas" rows="3" placeholder="Detalles de la reparación..."
-                                  class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ old('notas_tecnicas', $ticket->notas_tecnicas) }}</textarea>
-                    </div>
-
-                    <!-- Selección de Repuestos -->
-                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                        <h3 class="text-sm font-bold text-gray-700 mb-3 uppercase text-blue-600">Añadir Material al Parte</h3>
+                    <!-- Bloque Añadir Material (Oculto en impresión) -->
+                    <div class="bg-blue-50/50 p-6 rounded-[2rem] border border-blue-100 no-print">
+                        <h3 class="text-[11px] font-black text-blue-600 uppercase italic tracking-[0.15em] mb-4">Añadir Material al Parte</h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="md:col-span-2">
-                                <label class="block text-xs text-gray-500">Pieza / Repuesto</label>
-                                <select name="repuesto_id" class="w-full border-gray-300 rounded-md shadow-sm">
-                                    <option value="">-- Seleccionar pieza para añadir --</option>
+                                <select name="repuesto_id" class="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none">
+                                    <option value="">-- Seleccionar pieza del almacén --</option>
                                     @foreach($repuestos as $repuesto)
                                         <option value="{{ $repuesto->id }}">
                                             {{ $repuesto->descripcion }} (Stock: {{ $repuesto->stock_actual }})
@@ -67,61 +113,60 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div>
-                                <label class="block text-xs text-gray-500">Cantidad</label>
-                                <input type="number" name="cantidad_repuesto" value="1" min="1" 
-                                    class="w-full border-gray-300 rounded-md shadow-sm">
-                            </div>
+                            <input type="number" name="cantidad_repuesto" value="1" min="1" class="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none">
                         </div>
                     </div>
 
-                    <!-- Botón Guardar Cambios Principal -->
-                    <div class="flex justify-end pt-4 border-b pb-6">
-                        <button type="submit" 
-                                class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition-colors">
-                            Guardar Cambios y Piezas
+                    <!-- Botón Guardar -->
+                    <div class="flex justify-end no-print pt-4">
+                        <button type="submit" class="bg-blue-600 text-white px-12 py-4 rounded-2xl font-black shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all transform hover:-translate-y-1 uppercase text-[11px] italic tracking-widest">
+                            Guardar Cambios
                         </button>
                     </div>
                 </form>
 
-                <!-- TABLA DE REPUESTOS (FUERA DEL FORMULARIO ANTERIOR) -->
-                <div class="mt-8">
-                    <h3 class="text-sm font-bold text-gray-700 mb-3 uppercase">Repuestos ya utilizados</h3>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 border">
-                            <thead class="bg-gray-50">
+                <!-- 2. TABLA DE REPUESTOS (FUERA DEL FORMULARIO PARA QUE FUNCIONE EL DELETE) -->
+                <div class="mt-12 repuestos-container no-print">
+                    <h3 class="text-[11px] font-black text-slate-400 uppercase italic tracking-widest mb-4">Repuestos utilizados actualmente</h3>
+                    <div class="overflow-hidden border border-slate-100 rounded-2xl">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-slate-50 border-b border-slate-100">
                                 <tr>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Pieza</th>
-                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Cant.</th>
-                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Acción</th>
+                                    <th class="px-6 py-4 text-[9px] font-black text-slate-400 uppercase italic tracking-widest">Pieza</th>
+                                    <th class="px-6 py-4 text-[9px] font-black text-slate-400 uppercase italic text-center tracking-widest">Cant.</th>
+                                    <th class="px-6 py-4 text-[9px] font-black text-slate-400 uppercase italic text-right tracking-widest">Acción</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-200">
+                            <tbody class="divide-y divide-slate-100">
                                 @forelse($ticket->repuestos as $item)
-                                <tr>
-                                    <td class="px-4 py-2 text-sm">{{ $item->descripcion }}</td>
-                                    <td class="px-4 py-2 text-sm text-center font-bold">{{ $item->pivot->cantidad }}</td>
-                                    <td class="px-4 py-2 text-sm text-right">
-                                        <!-- Formulario de borrado independiente -->
-                                        <form action="{{ route('tickets.repuesto.destroy', [$ticket->id, $item->id]) }}" method="POST" onsubmit="return confirm('¿Devolver esta pieza al stock?')">
+                                <tr class="hover:bg-slate-50 transition-colors">
+                                    <td class="px-6 py-4 text-sm font-bold text-slate-700">{{ $item->descripcion }}</td>
+                                    <td class="px-6 py-4 text-sm font-black text-center text-blue-600">{{ $item->pivot->cantidad }}</td>
+                                    <td class="px-6 py-4 text-right">
+                                        <form action="{{ route('tickets.repuesto.destroy', [$ticket->id, $item->id, $item->pivot->cantidad]) }}" method="POST" onsubmit="return confirm('¿Devolver al stock?')">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-800 font-bold text-xs uppercase hover:underline">
-                                                Eliminar
+                                            <button type="submit" class="inline-flex items-center text-red-500 hover:text-red-700 font-black text-[10px] uppercase transition-colors px-3 py-1 bg-red-50 rounded-lg border border-red-100">
+                                                <svg xmlns="http://w3.org" class="h-3 w-3 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                                Devolver
                                             </button>
                                         </form>
                                     </td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="3" class="px-4 py-4 text-sm text-gray-500 text-center italic">No hay repuestos asignados a este parte todavía.</td>
+                                    <td colspan="3" class="px-6 py-12 text-center text-slate-400 italic text-sm">No hay piezas asignadas todavía.</td>
                                 </tr>
                                 @endforelse
                             </tbody>
                         </table>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
-</x-app-layout>
+</body>
+</html>

@@ -212,13 +212,24 @@ class TicketController extends Controller
         return redirect()->route('tickets.index')->with('success', 'Parte actualizado y cliente notificado si procede.');
     }
 
-    public function destroyRepuesto(Ticket $ticket, $repuestoId)
+   public function destroyRepuesto(Ticket $ticket, $repuestoId, $cantidad)
     {
-        $repuesto = Repuesto::findOrFail($repuestoId);
-        $cantidadUsada = $ticket->repuestos()->where('repuesto_id', $repuestoId)->first()->pivot->cantidad;
-        $repuesto->increment('stock_actual', $cantidadUsada);
-        $ticket->repuestos()->detach($repuestoId);
+        // 1. Buscamos el repuesto en el almacén para devolverle el stock
+        $repuestoAlmacen = \App\Models\Repuesto::find($repuestoId);
+        
+        if ($repuestoAlmacen) {
+            // Devolvemos exactamente la cantidad de la línea pulsada
+            $repuestoAlmacen->increment('stock_actual', $cantidad);
 
-        return back()->with('success', 'Repuesto eliminado y stock devuelto');
+            // 2. Borramos SOLO UNA fila que coincida con el ticket, el repuesto Y LA CANTIDAD
+            $ticket->repuestos()->newPivotStatement()
+                ->where('ticket_id', $ticket->id)
+                ->where('repuesto_id', $repuestoId)
+                ->where('cantidad', $cantidad)
+                ->limit(1) // Solo una, por si hubiera dos líneas de la misma cantidad
+                ->delete();
+        }
+
+        return redirect()->back();
     }
 }

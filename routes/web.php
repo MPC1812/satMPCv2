@@ -25,7 +25,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/tecnico/tickets/{ticket}/imprimir', [TicketController::class, 'imprimir'])->name('tickets.imprimir');
     Route::get('/tecnico/tickets/{ticket}/edit', [TicketController::class, 'edit'])->name('tickets.edit');
     Route::put('/tecnico/tickets/{ticket}', [TicketController::class, 'update'])->name('tickets.update');
-    Route::delete('/tecnico/tickets/{ticket}/repuesto/{repuesto}', [TicketController::class, 'destroyRepuesto'])->name('tickets.repuesto.destroy');
+    Route::delete('/tickets/{ticket}/repuesto/{repuesto}/{cantidad}', [TicketController::class, 'destroyRepuesto'])
+        ->name('tickets.repuesto.destroy');
     Route::get('/tickets/{ticket}', [TicketController::class, 'show'])->name('tickets.show');
 
     // Rutas de Perfil (Breeze)
